@@ -1,5 +1,5 @@
 function FishNode(angle){
-  this.angle = Math.PI*angle/90;
+  this.angle = angle;
 }
 FishNode.prototype.draw = function(){
 }
@@ -166,6 +166,7 @@ function GoldFish(x,y){
   this.angle = 1;
   this.angles = new Array();
   this.scale = 0.5;
+  this.free = true;
   
 }
 GoldFish.prototype.nodeDis = new Array(20,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10);
@@ -195,9 +196,10 @@ GoldFish.prototype.draw = function(){
   ctx.save();
   ctx.translate(this.x,this.y);
   ctx.scale(this.scale, this.scale);
-  ctx.rotate(this.angle);
+  ctx.rotate(Math.PI*this.angle/90);
   for(var i in this.fishNodes){
-    ctx.rotate(this.fishNodes[i].angle);
+	this.fishNodes[i].angle = this.angles[i];
+    ctx.rotate(Math.PI*this.fishNodes[i].angle/90);
     this.fishNodes[i].draw();
 	ctx.translate(0,this.nodeDis[i]);
   }
@@ -210,5 +212,17 @@ if (canvas.getContext){
   var ctx = canvas.getContext('2d');  
   var gf = new GoldFish(300,300);
   gf.init();
-  gf.draw();
+  var time=0;
+  window.setInterval(function(){
+	
+	
+	gf.angles.splice(0,0,0);
+	gf.angles.pop();
+	gf.draw();
+	gf.x = gf.x + 8*Math.sin(Math.PI*gf.angle/90);
+	gf.y = gf.y - 8*Math.cos(Math.PI*gf.angle/90);
+	
+	
+  },50);
+  
 }  
