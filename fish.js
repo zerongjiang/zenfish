@@ -1,12 +1,11 @@
 function FishNode(angle){
   this.angle = Math.PI*angle/90;
-  this.elements = new Array();
 }
 FishNode.prototype.draw = function(){
 }
 
 function FishHead(angle,headSize,eyeSize){
-  FishNode.call(angle);
+  FishNode.call(this,angle);
   this.headSize = headSize;
   this.eyeSize  = eyeSize;
 }
@@ -50,11 +49,13 @@ FishHead.prototype.draw = function(){
   ctx.restore();
 }
 
+
 function FishBody(angle,bodySize,finScale,finOffset){
   FishNode.call(this,angle);
   this.bodySize = bodySize;
   this.leftFin  = new FishFin("l",finScale);
   this.rightFin = new FishFin("r",finScale);
+  this.finScale = finScale;
   this.finOffset = finOffset;
 }
 FishBody.prototype.draw = function(){
@@ -65,6 +66,16 @@ FishBody.prototype.draw = function(){
   ctx.closePath();
   ctx.fill();
   ctx.restore();
+  
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.beginPath();
+  ctx.scale(0.2,1)
+  ctx.arc(0,this.bodySize*1.1,this.bodySize*1.2,0,Math.PI*2,true);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
   ctx.save();
   ctx.translate(0-this.finOffset,0);
   this.leftFin.draw();
@@ -111,6 +122,42 @@ FishFin.prototype.draw = function(){
   ctx.restore();
 }
 
+function FishTail(angle,scale){
+  FishNode.call(this,angle);
+  this.scale = scale;
+}
+FishTail.prototype.draw = function(){
+  ctx.save();
+  ctx.scale(this.scale,this.scale);
+  ctx.translate(-160,0);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+  ctx.beginPath();
+  ctx.moveTo(9.2440678,69.740678);
+  ctx.bezierCurveTo(9.1474869,58.583844,23.997949,17.122299,138.27585,8.3703387);
+  ctx.bezierCurveTo(138.27585,8.3703387,100.47229999999999,29.959476000000002,95.265255,83.47839);
+  ctx.bezierCurveTo(94.144829,94.99432,76.833572,101.72138,62.140678,101.70975);
+  ctx.bezierCurveTo(46.32966,101.69723,9.3343332,80.167955,9.2440678,69.740678);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(142.25593,7.3432201);
+  ctx.bezierCurveTo(148.25743,4.082971799999999,305.13119,6.7968089,312.24406999999997,71.281356);
+  ctx.bezierCurveTo(313.77374999999995,85.149204,300.68100999999996,105.72651,287.33644,105.68983);
+  ctx.bezierCurveTo(269.17118,105.63993,235.72373,86.688135,235.72373,86.688135);
+  ctx.bezierCurveTo(235.72373,86.688135,250.25235999999998,142.92732,246.76524999999998,181.43983);
+  ctx.bezierCurveTo(240.89190999999997,183.70668,219.34096999999997,212.84597,211.07288,213.02373);
+  ctx.bezierCurveTo(201.52679,213.22896,205.02056,211.05052,195.15254,211.22627);
+  ctx.bezierCurveTo(175.86118,211.56984,175.64425999999997,244.42816,162.54153,244.35085);
+  ctx.bezierCurveTo(145.01193,244.24742,142.02961,215.87323,130.70085,202.49576000000002);
+  ctx.bezierCurveTo(116.87486,186.16946,102.53579,176.33114,83.059096,176.99937);
+  ctx.bezierCurveTo(82.962228,79.328651,122.00529,36.055052,142.25593,7.3432201);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+
+}
+
 
 function GoldFish(x,y){
   this.x = x;
@@ -119,13 +166,22 @@ function GoldFish(x,y){
   this.fishNodes = new Array();
   this.angle = Math.PI*0/90;
 
-  this.head = new FishHead(0,60,20);
-  this.fishNodes.push(this.head);
-  this.body1 = new FishBody(3,25,0.1,30);
-  this.fishNodes.push(this.body1);
 }
-
 GoldFish.prototype.nodeDis = 10;
+GoldFish.prototype.numOfBodies = 10;
+GoldFish.prototype.numOfTails = 8;
+
+GoldFish.prototype.init = function(){
+  this.fishNodes.push(new FishHead(0,60,20));
+
+  for(var i=0; i < this.numOfBodies; i++){
+    this.fishNodes.push(new FishBody(0,14+20*Math.sin(Math.PI*(i+3)/this.numOfBodies),0.1+i/this.numOfBodies/10,40+6*i));
+  }
+
+  for(var i=0; i< this.numOfTails; i++){
+    this.fishNodes.push(new FishTail(0,0.3+i/this.numOfTails/2));
+  }
+}
 
 GoldFish.prototype.draw = function(){
   ctx.save();
@@ -139,17 +195,11 @@ GoldFish.prototype.draw = function(){
   ctx.restore();
 }
 
-function test(){
-  ctx.save();
-  ctx.fillStyle="#FF0000";
-  ctx.fillRect(0,0,150,75);
-  ctx.restore();
-}
 
 var canvas = document.getElementById('fish');  
 if (canvas.getContext){  
   var ctx = canvas.getContext('2d');  
   var gf = new GoldFish(300,100);
+  gf.init();
   gf.draw();
-
 }  
