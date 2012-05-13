@@ -24,9 +24,9 @@ FishHead.prototype.draw = function(){
 
   var leyeX = Math.cos(Math.PI/4)*this.headSize;
   var leyeY = -Math.sin(Math.PI/4)*this.headSize;
-  var leyeStyle = ctx.createRadialGradient(leyeX,leyeY,0,leyeX,leyeY,this.eyeSize*1.5);
+  var leyeStyle = ctx.createRadialGradient(leyeX,leyeY,0,leyeX,leyeY,this.eyeSize*1.2);
   leyeStyle.addColorStop(0, 'rgba(0,0,0,1)');
-  leyeStyle.addColorStop(0.2, 'rgba(0,0,0,0.9)');
+  leyeStyle.addColorStop(0.1, 'rgba(0,0,0,0.9)');
   leyeStyle.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = leyeStyle;
   ctx.beginPath();
@@ -36,9 +36,9 @@ FishHead.prototype.draw = function(){
 
   var reyeX = Math.cos(Math.PI*3/4)*this.headSize;
   var reyeY = -Math.sin(Math.PI*3/4)*this.headSize;
-  var reyeStyle = ctx.createRadialGradient(reyeX,reyeY,0,reyeX,reyeY,this.eyeSize*1.5);
+  var reyeStyle = ctx.createRadialGradient(reyeX,reyeY,0,reyeX,reyeY,this.eyeSize*1.2);
   reyeStyle.addColorStop(0, 'rgba(0,0,0,1)');
-  reyeStyle.addColorStop(0.2, 'rgba(0,0,0,0.9)');
+  reyeStyle.addColorStop(0.1, 'rgba(0,0,0,0.9)');
   reyeStyle.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = reyeStyle;
   ctx.beginPath();
@@ -50,9 +50,10 @@ FishHead.prototype.draw = function(){
 }
 
 
-function FishBody(angle,bodySize,finScale,finOffset){
+function FishBody(angle,bodySize,boneSize,finScale,finOffset){
   FishNode.call(this,angle);
   this.bodySize = bodySize;
+  this.boneSize = boneSize;
   this.leftFin  = new FishFin("l",finScale);
   this.rightFin = new FishFin("r",finScale);
   this.finScale = finScale;
@@ -62,7 +63,7 @@ FishBody.prototype.draw = function(){
   ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,0.1)';
   ctx.beginPath();
-  ctx.arc(0,this.bodySize,this.bodySize,0,Math.PI*2,true);
+  ctx.arc(0,0,this.bodySize,0,Math.PI*2,true);
   ctx.closePath();
   ctx.fill();
   ctx.restore();
@@ -71,7 +72,7 @@ FishBody.prototype.draw = function(){
   ctx.fillStyle = 'rgba(0,0,0,0.1)';
   ctx.beginPath();
   ctx.scale(0.2,1)
-  ctx.arc(0,this.bodySize*1.1,this.bodySize*1.2,0,Math.PI*2,true);
+  ctx.arc(0,0,this.boneSize,0,Math.PI*2,true);
   ctx.closePath();
   ctx.fill();
   ctx.restore();
@@ -94,11 +95,11 @@ FishFin.prototype.draw = function(){
   ctx.save();
   if(this.lr == "l"){
     ctx.scale(this.scale,this.scale);
-    ctx.translate(-210,0);
+    ctx.translate(-210,-100);
   }
   else if(this.lr == "r"){
     ctx.scale(0-this.scale,this.scale);
-    ctx.translate(-210,0);
+    ctx.translate(-210,-100);
   }
   ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
   ctx.beginPath();
@@ -153,9 +154,7 @@ FishTail.prototype.draw = function(){
   ctx.bezierCurveTo(82.962228,79.328651,122.00529,36.055052,142.25593,7.3432201);
   ctx.closePath();
   ctx.fill();
-
   ctx.restore();
-
 }
 
 
@@ -164,33 +163,43 @@ function GoldFish(x,y){
   this.y = y;
 
   this.fishNodes = new Array();
-  this.angle = Math.PI*0/90;
-
+  this.angle = 1;
+  this.angles = new Array();
+  this.scale = 0.5;
+  
 }
-GoldFish.prototype.nodeDis = 10;
-GoldFish.prototype.numOfBodies = 10;
-GoldFish.prototype.numOfTails = 8;
+GoldFish.prototype.nodeDis = new Array(20,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10);
+GoldFish.prototype.numOfBodies = 12;
+GoldFish.prototype.bodySizes = new Array(20,28,36,40,0,29,24,20,17,14,11,10);
+GoldFish.prototype.boneSizes = new Array(0,0,30,30,0,30,30,30,30,30,30,30);
+GoldFish.prototype.numOfTails = 12;
 
 GoldFish.prototype.init = function(){
-  this.fishNodes.push(new FishHead(0,60,20));
-
+  for(var i=0; i< 1+this.numOfBodies+this.numOfTails; i++){
+    this.angles[i] = 1;
+  }
+  
+  this.fishNodes.push(new FishHead(this.angles[0],60,20));
   for(var i=0; i < this.numOfBodies; i++){
-    this.fishNodes.push(new FishBody(0,14+20*Math.sin(Math.PI*(i+3)/this.numOfBodies),0.1+i/this.numOfBodies/10,40+6*i));
+    //this.fishNodes.push(new FishBody(0,20+20*Math.sin(Math.PI*(i+3)/this.numOfBodies),0.1+i/this.numOfBodies/10,30+3*i));
+	this.fishNodes.push(new FishBody(this.angles[1+i],this.bodySizes[i],this.boneSizes[i],0.1+i*0.01,33+3*i));
   }
-
   for(var i=0; i< this.numOfTails; i++){
-    this.fishNodes.push(new FishTail(0,0.3+i/this.numOfTails/2));
+    this.fishNodes.push(new FishTail(this.angles[1+this.numOfBodies+i],0.2+i*0.05));
   }
+  
 }
 
 GoldFish.prototype.draw = function(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.save();
   ctx.translate(this.x,this.y);
+  ctx.scale(this.scale, this.scale);
   ctx.rotate(this.angle);
   for(var i in this.fishNodes){
     ctx.rotate(this.fishNodes[i].angle);
     this.fishNodes[i].draw();
-    ctx.translate(0,this.nodeDis);
+	ctx.translate(0,this.nodeDis[i]);
   }
   ctx.restore();
 }
@@ -199,7 +208,7 @@ GoldFish.prototype.draw = function(){
 var canvas = document.getElementById('fish');  
 if (canvas.getContext){  
   var ctx = canvas.getContext('2d');  
-  var gf = new GoldFish(300,100);
+  var gf = new GoldFish(300,300);
   gf.init();
   gf.draw();
 }  
