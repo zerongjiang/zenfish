@@ -2,21 +2,22 @@ function FishNode(angle){
   this.angle = angle;
   this.x  = 0;
   this.y  = 0;
-}
+};
+FishNode.prototype.color = "0,0,0";
 FishNode.prototype.draw = function(){
-}
+};
 
 function FishHead(angle,headSize,eyeSize){
   FishNode.call(this,angle);
   this.headSize = headSize;
   this.eyeSize  = eyeSize;
-}
-
+};
+FishHead.prototype = new FishNode();
 FishHead.prototype.draw = function(){
   ctx.save();
   var headStyle = ctx.createRadialGradient(this.headSize/2,0,0,0,0,this.headSize*1.2);
-  headStyle.addColorStop(0, 'rgba(0,0,0,1)');
-  headStyle.addColorStop(0.2, 'rgba(0,0,0,0.9)');
+  headStyle.addColorStop(0, 'rgba('+this.color+',1)');
+  headStyle.addColorStop(0.2, 'rgba('+this.color+',0.9)');
   headStyle.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = headStyle;
   ctx.beginPath();
@@ -27,8 +28,8 @@ FishHead.prototype.draw = function(){
   var leyeX = Math.cos(-Math.PI/4)*this.headSize;
   var leyeY = Math.sin(-Math.PI/4)*this.headSize;
   var leyeStyle = ctx.createRadialGradient(leyeX,leyeY,0,leyeX,leyeY,this.eyeSize*1.2);
-  leyeStyle.addColorStop(0, 'rgba(0,0,0,1)');
-  leyeStyle.addColorStop(0.1, 'rgba(0,0,0,0.9)');
+  leyeStyle.addColorStop(0, 'rgba('+this.color+',1)');
+  leyeStyle.addColorStop(0.1, 'rgba('+this.color+',0.9)');
   leyeStyle.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = leyeStyle;
   ctx.beginPath();
@@ -39,8 +40,8 @@ FishHead.prototype.draw = function(){
   var reyeX = Math.cos(Math.PI/4)*this.headSize;
   var reyeY = Math.sin(Math.PI/4)*this.headSize;
   var reyeStyle = ctx.createRadialGradient(reyeX,reyeY,0,reyeX,reyeY,this.eyeSize*1.2);
-  reyeStyle.addColorStop(0, 'rgba(0,0,0,1)');
-  reyeStyle.addColorStop(0.1, 'rgba(0,0,0,0.9)');
+  reyeStyle.addColorStop(0, 'rgba('+this.color+',1)');
+  reyeStyle.addColorStop(0.1, 'rgba('+this.color+',0.9)');
   reyeStyle.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = reyeStyle;
   ctx.beginPath();
@@ -61,9 +62,10 @@ function FishBody(angle,bodySize,boneSize,finScale,finOffset){
   this.finScale = finScale;
   this.finOffset = finOffset;
 }
+FishBody.prototype = new FishNode();
 FishBody.prototype.draw = function(){
   ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillStyle = 'rgba('+this.color+',0.1)';
   ctx.beginPath();
   ctx.arc(0,0,this.bodySize,0,Math.PI*2,true);
   ctx.closePath();
@@ -71,7 +73,7 @@ FishBody.prototype.draw = function(){
   ctx.restore();
   
   ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillStyle = 'rgba('+this.color+',0.1)';
   ctx.beginPath();
   ctx.scale(1,0.2)
   ctx.arc(0,0,this.boneSize,0,Math.PI*2,true);
@@ -101,7 +103,7 @@ FishFin.prototype.draw = function(){
   else if(this.lr == "r"){
     ctx.scale(this.scale,0-this.scale);
   }
-  ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+  ctx.fillStyle = 'rgba('+this.color+',0.05)';
   ctx.beginPath();
   ctx.moveTo(99.834161,-23.154407);
   ctx.bezierCurveTo(99.834161,-23.154407,51.796080999999994,6.640861700000002,-31.220635000000016,-1.6100226000000006);
@@ -127,10 +129,11 @@ function FishTail(angle,scale){
   FishNode.call(this,angle);
   this.scale = scale;
 }
+FishTail.prototype = new FishNode();
 FishTail.prototype.draw = function(){
   ctx.save();
   ctx.scale(this.scale,this.scale);
-  ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+  ctx.fillStyle = 'rgba('+this.color+',0.05)';
   ctx.beginPath();
   ctx.moveTo(-52.425581,-124.5897);
   ctx.bezierCurveTo(-43.25419,-124.6691,-9.171051599999998,-112.46136999999999,-1.976571800000002,-18.52001299999999);
@@ -160,19 +163,25 @@ FishTail.prototype.draw = function(){
 function GoldFish(x,y){
   this.x = x;
   this.y = y;
-
   this.angle =0;
 
   this.fishNodes = new Array();
-  this.scale = 0.5;
-  this.free = true;
+  this.scale = 0.3;
   this.nodeDis = 10*this.scale;
   
+  this.free = true;
+  this.chasingX;
+  this.chasingY;
+  this.shaking = false;
+  this.timer = 0;
 }
+GoldFish.prototype.speed = 1;
+GoldFish.prototype.agility = 6;
 GoldFish.prototype.numOfBodies = 12;
 GoldFish.prototype.bodySizes = new Array(20,28,36,40,0,29,24,20,17,14,11,10);
 GoldFish.prototype.boneSizes = new Array(0,0,30,30,0,30,30,30,30,30,30,30);
 GoldFish.prototype.numOfTails = 12;
+GoldFish.prototype.color = "0,0,0";
 
 GoldFish.prototype.init = function(){
     
@@ -202,18 +211,24 @@ GoldFish.prototype.draw = function(){
     ctx.restore();
   }
 }
-GoldFish.prototype.next = function(x,y,angle){
+GoldFish.prototype.next = function(){
+  for(var j = 0; j < this.speed; j++){
+    this.timer = (this.timer + 1)%36;
+    this.angle = this.angle + Math.sin(Math.PI*this.timer*10/180)*2;
 
-  for(var i=this.numOfBodies+this.numOfTails; i >= 1 ; i--){
-    this.fishNodes[i].x = this.fishNodes[i-1].x ;
-    this.fishNodes[i].y = this.fishNodes[i-1].y ;
-    this.fishNodes[i].angle = this.fishNodes[i-1].angle ;
+    this.x = this.x + this.nodeDis*Math.cos(Math.PI*this.angle/180);
+    this.y = this.y + this.nodeDis*Math.sin(Math.PI*this.angle/180);
+
+    for(var i = this.fishNodes.length-1; i >= 1 ; i--){
+      this.fishNodes[i].x = this.fishNodes[i-1].x ;
+      this.fishNodes[i].y = this.fishNodes[i-1].y ;
+      this.fishNodes[i].angle = this.fishNodes[i-1].angle;
+    }
+
+    this.fishNodes[0].x = this.x;
+    this.fishNodes[0].y = this.y;
+    this.fishNodes[0].angle = this.angle;
   }
-
-  this.fishNodes[0].x = x;
-  this.fishNodes[0].y = y;
-  this.fishNodes[0].angle = angle;
-
 }
 GoldFish.prototype.hit = function(x,y){
   if( Math.sqrt( Math.pow((x-this.x),2)+Math.pow((y-this.y),2) ) < 10){
@@ -223,20 +238,21 @@ GoldFish.prototype.hit = function(x,y){
     return false;
   }
 }
-GoldFish.prototype.go = function(x,y){
+
+GoldFish.prototype.chase = function(x,y){
   var angleXY = Math.atan2(y-this.y,x-this.x);
   var angle   = Math.PI*this.angle/180;
-  if( Math.abs(angleXY-angle) <= Math.PI/30 && Math.abs(angleXY-angle) >= Math.PI*59/30 ){
+  if( Math.abs(angleXY-angle) <= Math.PI*this.agility/180 || Math.abs(angleXY-angle) >= Math.PI*(360-this.agility)/180 ){
   }
   else if( Math.abs(angleXY-angle) <= Math.PI){
     if( angleXY > angle){
-      this.angle = this.angle + Math.random()*3;
+      this.angle = this.angle + Math.random()*this.agility;
       if(this.angle > 180){
         this.angle = this.angle - 360;
       }
     }
     else{
-      this.angle = this.angle - Math.random()*3;
+      this.angle = this.angle - Math.random()*this.agility;
       if(this.angle < -180){
         this.angle = this.angle + 360;
       }
@@ -244,33 +260,17 @@ GoldFish.prototype.go = function(x,y){
   }
   else if( Math.abs(angleXY-angle) > Math.PI){
     if( angleXY < angle){
-      this.angle = this.angle + Math.random()*3;
+      this.angle = this.angle + Math.random()*this.agility;
       if(this.angle > 180){
         this.angle = this.angle - 360;
       }
     }
     else{
-      this.angle = this.angle - Math.random()*3;
+      this.angle = this.angle - Math.random()*this.agility;
       if(this.angle < -180){
         this.angle = this.angle + 360;
       }
     }
   }
-  this.x = this.x + this.nodeDis*Math.cos(Math.PI*this.angle/180);
-  this.y = this.y + this.nodeDis*Math.sin(Math.PI*this.angle/180);
-  this.next(this.x,this.y,this.angle);
+  this.next();
 }
-
-
-var canvas = document.getElementById('fish');  
-if (canvas.getContext){  
-  var ctx = canvas.getContext('2d');
-  var gf = new GoldFish(0,0);
-  gf.init();
-  var time=0;
-	gf.draw();
-  window.setInterval(function(){
-    gf.go(500,300);
-    gf.draw();
-  },50);
-}  

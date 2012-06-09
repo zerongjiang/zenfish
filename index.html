@@ -6,7 +6,39 @@
 </style>  
   </head>  
   <body>  
-    <canvas id="fish" width="1200" height="800"></canvas>  
+    <canvas id="fish" width="1200" height="800"></canvas> 
+    <span id="debug"></span>
   </body>  
   <script type="text/javascript" src="fish.js"></script>  
+  <script type="text/javascript">
+var canvas = document.getElementById('fish');  
+if (canvas.getContext){  
+  var ctx = canvas.getContext('2d');
+  var gf = new GoldFish(200,100);
+  gf.init();
+	gf.draw();
+  gf.chasingX=0;
+  gf.chasingY=0;
+  window.setInterval(function(){
+    gf.chase(gf.chasingX,gf.chasingY);
+    if(Math.floor(Math.random()*300) == 0 ){
+      if( gf.speed == 1) gf.speed = 2;
+    }
+    if(Math.floor(Math.random()*90) == 0 ){
+      if( gf.speed != 1) gf.speed = 1;
+    }
+    gf.draw();
+  },30);
+  document.getElementById("fish").onmousemove = function(e){
+    if(e.offsetX) {
+      gf.chasingX = e.offsetX;
+      gf.chasingY = e.offsetY;
+    }
+    else if(e.layerX) {
+      gf.chasingX = e.layerX;
+      gf.chasingY = e.layerY;
+    }
+  }
+}  
+  </script>
 </html>  
